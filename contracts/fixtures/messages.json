@@ -1,0 +1,232 @@
+[
+  {
+    "name": "transcribe",
+    "direction": "request",
+    "valid": true,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "cancel",
+    "direction": "request",
+    "valid": true,
+    "json": "{\"type\": \"cancel\", \"protocol_version\": 1, \"request_id\": \"d-1\"}"
+  },
+  {
+    "name": "ready",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"ready\", \"protocol_version\": 1, \"request_id\": \"startup\"}"
+  },
+  {
+    "name": "result",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"result\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"text\": \"Bonjour\", \"language\": \"fr\", \"duration_ms\": 2300}"
+  },
+  {
+    "name": "error",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"error\", \"protocol_version\": 1, \"request_id\": \"startup\", \"code\": \"MODEL_NOT_FOUND\", \"message\": \"Modèle local introuvable\"}"
+  },
+  {
+    "name": "cancelled",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"cancelled\", \"protocol_version\": 1, \"request_id\": \"d-1\"}"
+  },
+  {
+    "name": "version",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 2, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "bool-version",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": true, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "unknown",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true, \"unexpected\": 1}"
+  },
+  {
+    "name": "relative",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"tmp/a\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "vad-off",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": false}"
+  },
+  {
+    "name": "language",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"de\", \"vad\": true}"
+  },
+  {
+    "name": "empty-id",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "startup-reserved",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"startup\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "missing",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\"}"
+  },
+  {
+    "name": "bool-duration",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"result\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"text\": \"Bonjour\", \"language\": \"fr\", \"duration_ms\": true}"
+  },
+  {
+    "name": "negative-duration",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"result\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"text\": \"Bonjour\", \"language\": \"fr\", \"duration_ms\": -1}"
+  },
+  {
+    "name": "unsafe-duration",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"result\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"text\": \"Bonjour\", \"language\": \"fr\", \"duration_ms\": 9007199254740992}"
+  },
+  {
+    "name": "float-duration",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"result\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"text\": \"Bonjour\", \"language\": \"fr\", \"duration_ms\": 1.5}"
+  },
+  {
+    "name": "auto-result",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"result\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"text\": \"Bonjour\", \"language\": \"auto\", \"duration_ms\": 2300}"
+  },
+  {
+    "name": "empty-text",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"result\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"text\": \"\", \"language\": \"fr\", \"duration_ms\": 2300}"
+  },
+  {
+    "name": "bad-code",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"error\", \"protocol_version\": 1, \"request_id\": \"startup\", \"code\": \"OTHER\", \"message\": \"Modèle local introuvable\"}"
+  },
+  {
+    "name": "ready-id",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"ready\", \"protocol_version\": 1, \"request_id\": \"d-1\"}"
+  },
+  {
+    "name": "malformed",
+    "direction": "request",
+    "valid": false,
+    "json": "{"
+  },
+  {
+    "name": "wrong-direction",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "duplicate-field",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\":\"ready\",\"protocol_version\":1,\"protocol_version\":1,\"request_id\":\"startup\"}",
+    "wire_only": true
+  },
+  {
+    "name": "duplicate-tag",
+    "direction": "response",
+    "valid": false,
+    "json": "{\"type\":\"ready\",\"type\":\"ready\",\"protocol_version\":1,\"request_id\":\"startup\"}",
+    "wire_only": true
+  },
+  {
+    "name": "transcribe-en",
+    "direction": "request",
+    "valid": true,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"en\", \"vad\": true}"
+  },
+  {
+    "name": "transcribe-auto",
+    "direction": "request",
+    "valid": true,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": \"auto\", \"vad\": true}"
+  },
+  {
+    "name": "nul-path",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/\\u0000a\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "bool-language",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": true, \"vad\": true}"
+  },
+  {
+    "name": "array-language",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": \"/models/a\", \"language\": [], \"vad\": true}"
+  },
+  {
+    "name": "null-path",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"/tmp/a.wav\", \"model_path\": null, \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "empty-path",
+    "direction": "request",
+    "valid": false,
+    "json": "{\"type\": \"transcribe\", \"protocol_version\": 1, \"request_id\": \"d-1\", \"audio_path\": \"\", \"model_path\": \"/models/a\", \"language\": \"fr\", \"vad\": true}"
+  },
+  {
+    "name": "api_config_error",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"error\", \"protocol_version\": 1, \"request_id\": \"startup\", \"code\": \"API_CONFIG_ERROR\", \"message\": \"Configuration API indisponible.\"}"
+  },
+  {
+    "name": "api_auth_error",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"error\", \"protocol_version\": 1, \"request_id\": \"startup\", \"code\": \"API_AUTH_ERROR\", \"message\": \"Configuration API indisponible.\"}"
+  },
+  {
+    "name": "api_rate_limit",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"error\", \"protocol_version\": 1, \"request_id\": \"startup\", \"code\": \"API_RATE_LIMIT\", \"message\": \"Configuration API indisponible.\"}"
+  },
+  {
+    "name": "api_unavailable",
+    "direction": "response",
+    "valid": true,
+    "json": "{\"type\": \"error\", \"protocol_version\": 1, \"request_id\": \"startup\", \"code\": \"API_UNAVAILABLE\", \"message\": \"Configuration API indisponible.\"}"
+  }
+]

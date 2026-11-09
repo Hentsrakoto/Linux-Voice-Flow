@@ -1,0 +1,26 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Local push-to-talk dictation, runtime status and X11 shortcut settings for the main window.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "allow-get-app-info",
+    "allow-get-hotkey-status",
+    "allow-replace-hotkey",
+    "allow-get-dictation-status",
+    "allow-list-microphones",
+    "allow-list-local-models",
+    "allow-configure-dictation",
+    "allow-cancel-dictation",
+    "allow-clear-dictation-result",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "allow-get-settings",
+    "allow-save-settings",
+    "allow-get-diagnostics",
+    "allow-copy-dictation-result",
+    "allow-clear-dictation-clipboard"
+  ]
+}

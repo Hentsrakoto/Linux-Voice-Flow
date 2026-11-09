@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "default_model_id": "tiny",
+  "models": [
+    {
+      "id": "tiny",
+      "name": "Whisper Tiny",
+      "description": "Multilingue français/anglais, léger et rapide sur CPU.",
+      "repository": "Systran/faster-whisper-tiny",
+      "revision": "d90ca5fe260221311c53c58e660288d3deb8d356"
+    },
+    {
+      "id": "base",
+      "name": "Whisper Base",
+      "description": "Multilingue français/anglais, plus précis et plus exigeant sur CPU.",
+      "repository": "Systran/faster-whisper-base",
+      "revision": "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66"
+    }
+  ]
+}

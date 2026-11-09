@@ -1,0 +1,29 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": [
+    "src"
+  ],
+  "locale": "fr-FR",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": [
+    "Select/Listbox"
+  ],
+  "ownership": {
+    "Select/Listbox": "native"
+  },
+  "requiredCommands": [
+    "unit",
+    "typecheck",
+    "lint",
+    "build"
+  ],
+  "commands": {
+    "unit": "npm run test -- --run",
+    "typecheck": "npm run typecheck",
+    "lint": "npm run lint",
+    "build": "npm run build"
+  },
+  "evidence": {
+    "failurePaths": "src/features/dictation/DictationPanel.test.tsx"
+  }
+}

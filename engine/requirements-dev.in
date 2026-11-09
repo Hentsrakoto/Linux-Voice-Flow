@@ -1,0 +1,4 @@
+-c requirements.lock.txt
+pytest==9.2.0
+jsonschema==4.26.0
+pip-tools==7.6.2

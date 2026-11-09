@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linux-voice-flow.local/contracts/engine-v1.schema.json",
+  "title": "Linux Voice Flow JSONL v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "startup"
+          }
+        },
+        "type": {
+          "const": "transcribe"
+        },
+        "audio_path": {
+          "type": "string",
+          "pattern": "^/[^\\u0000]*$"
+        },
+        "language": {
+          "enum": [
+            "fr",
+            "en",
+            "auto"
+          ]
+        },
+        "model_path": {
+          "type": "string",
+          "pattern": "^/[^\\u0000]*$"
+        },
+        "vad": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "audio_path",
+        "language",
+        "model_path",
+        "vad"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "startup"
+          }
+        },
+        "type": {
+          "const": "cancel"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "request_id": {
+          "const": "startup"
+        },
+        "type": {
+          "const": "ready"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "startup"
+          }
+        },
+        "type": {
+          "const": "result"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "enum": [
+            "fr",
+            "en"
+          ]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "text",
+        "language",
+        "duration_ms"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "const": "error"
+        },
+        "code": {
+          "enum": [
+            "MIC_UNAVAILABLE",
+            "NO_SPEECH",
+            "MODEL_NOT_FOUND",
+            "MODEL_LOAD_FAILED",
+            "ENGINE_BUSY",
+            "ENGINE_TIMEOUT",
+            "ENGINE_CRASHED",
+            "FOCUS_CHANGED",
+            "INJECTION_FAILED",
+            "CLIPBOARD_FAILED",
+            "CANCELLED",
+            "PROTOCOL_ERROR",
+            "API_CONFIG_ERROR",
+            "API_AUTH_ERROR",
+            "API_RATE_LIMIT",
+            "API_UNAVAILABLE"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "code",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "not": {
+            "const": "startup"
+          }
+        },
+        "type": {
+          "const": "cancelled"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
