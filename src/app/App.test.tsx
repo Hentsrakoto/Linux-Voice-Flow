@@ -67,6 +67,32 @@ it('allows Groq without local models and never sends a key through IPC', async (
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('configure_dictation', { config: { provider: 'groq', model_path: '', microphone_id: 'default', language: 'fr' } }));
   expect(JSON.stringify(vi.mocked(invoke).mock.calls)).not.toContain('api_key');
 });
+it('preserves unsaved settings across navigation and focuses the active view', async () => {
+  render(<App />);
+  await screen.findByText('Prêt à dicter');
+  await userEvent.click(screen.getByRole('button', { name: 'Réglages' }));
+  expect(screen.getByRole('main')).toHaveFocus();
+  await userEvent.selectOptions(screen.getByLabelText('Langue'), 'en');
+  await userEvent.selectOptions(screen.getByLabelText('Service de transcription'), 'groq');
+  await userEvent.click(screen.getByRole('button', { name: 'Dictée' }));
+  expect(screen.getByRole('main')).toHaveFocus();
+  expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Réglages' }));
+  expect(screen.getByLabelText('Langue')).toHaveValue('en');
+  expect(screen.getByLabelText('Service de transcription')).toHaveValue('groq');
+  expect(invoke).not.toHaveBeenCalledWith('save_settings', expect.anything());
+});
+it('keeps diagnostics in settings and explains unavailable prerequisites', async () => {
+  mockCommands({ get_diagnostics: { x11_supported: false, microphone_available: false, model_available: false, engine_ready: false, xdotool_available: false, xclip_available: false } });
+  render(<App />);
+  await screen.findByText('Prêt à dicter');
+  expect(screen.queryByText('Diagnostic de l’application')).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Réglages' }));
+  await userEvent.click(screen.getByText('Diagnostic de l’application'));
+  expect(screen.getByText(/Installez xdotool/)).toBeVisible();
+  expect(screen.getByText(/Installez xclip/)).toBeVisible();
+  expect(screen.getByText(/Branchez le microphone sélectionné/)).toBeVisible();
+});
 it('keeps edits after failed save and does not prepare a different engine', async () => {
   const base = vi.mocked(invoke).getMockImplementation()!;
   vi.mocked(invoke).mockImplementation((command, args) => command === 'save_settings' ? Promise.reject({ message: 'secret-sentinel', code: 'PROTOCOL_ERROR' }) : base(command, args));

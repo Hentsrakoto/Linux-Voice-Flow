@@ -24,7 +24,7 @@ omitted:
 
 ## Overview
 
-A French desktop dictation utility: the main task is dictating into the current external application. A quiet Linux instrument panel, with the compact vf wordmark and a row of physical-looking shortcut keys as the signature. The main view has no configuration form or diagnostic grid. No promotional hero, simulated capture or fake transcription.
+A French desktop dictation utility: the main task is dictating into the current external application. A quiet Linux instrument panel, with the rounded green microphone-and-wave mark beside the Voice Flow name and a row of physical-looking shortcut keys as the signature. The main view has no configuration form or diagnostic grid. No promotional hero, simulated capture or fake transcription.
 
 ## Colors and runtime mapping
 
@@ -32,13 +32,13 @@ The six named frontmatter colors map exactly to `--color-*` inside the `@theme` 
 
 ## Typography
 
-System sans for product copy and headings, system mono for shortcut keys and metadata. No remote fonts. Heading 28–38px, normal copy 13–14px, metadata 10–12px. French accents remain intact. Shortcut keys are the only enlarged utility typography.
+System sans for product copy and headings, system mono for shortcut keys and metadata. No remote fonts. Heading 28–38px, normal copy 13–16px, metadata at least 12px. French accents remain intact. Shortcut keys are the only enlarged utility typography.
 
 ## Layout and navigation
 
-`App` owns a two-view navigation: Dictée and Réglages. Both are regular views, not dialogs. The shared runtime hook stays mounted across navigation, so asynchronous state and transcription retention remain backend-owned. Main maximum760px inside a1040px shell; reduce padding at600px. Allow page scrolling, wrap long status/error text, keep result height stable. Navigation uses semantic buttons with `aria-current`, visible keyboard focus and a skip link.
+`App` owns a two-view navigation: Dictée and Réglages. Both are regular views, not dialogs. The shared runtime hook stays mounted across navigation, so asynchronous state and transcription retention remain backend-owned. App also owns the unsaved settings draft; switching views does not discard edits. Focus moves to main content only on an explicit view change, never on a dictation status update. Main maximum760px inside a1040px shell; reduce padding at600px. Allow page scrolling, wrap long status/error text, keep result height stable. Navigation uses semantic buttons with `aria-current`, visible keyboard focus and a skip link.
 
-Dictée shows the actual registered shortcut, runtime status, service privacy indication, cancellation and the ephemeral result. It does not contain model, microphone, language, shortcut or provider configuration. Réglages owns all configuration and a diagnostic disclosure. Browser preview explores the two layouts honestly with disabled native controls; no IPC calls, microphone, fake ready status or fabricated results.
+Dictée shows the actual registered shortcut, runtime status, service privacy indication, cancellation and the ephemeral result. It does not contain model, microphone, language, shortcut or provider configuration. Réglages owns all configuration and a diagnostic disclosure with corrective actions for missing X11, selected microphone, model configuration, xdotool or xclip. Dictée keeps a short heading, the shortcut above the ephemeral result, and necessary status/privacy feedback. Browser preview explores the two layouts honestly with disabled native controls; no IPC calls, microphone, fake ready status or fabricated results.
 
 ## Canonical components
 
@@ -55,6 +55,6 @@ Automatic insertion starts enabled; automatic clipboard fallback consent starts 
 
 ## Icons, motion and accessibility
 
-Iconify Lucide icons are imported as bundled data and rendered through `@iconify/react/offline`; no icon API/CDN calls. Decorative icons are `aria-hidden`; every icon button retains a text label. No microphone animation implies actual capture. Reduced motion and forced colors are covered in `src/styles.css`. Scrollbar colors share the existing palette; focus outlines use primary.
+Iconify Lucide icons are imported as bundled data and rendered through `@iconify/react/offline`; no icon API/CDN calls. Decorative icons are `aria-hidden`; every icon button retains a text label. MicrophoneActivity distinguishes shortcut acknowledgement, backend-confirmed recording and processing. Green breathing rings appear only during native recording; they express activity, not measured audio volume. Processing uses a loader. Browser preview stays inactive. Reduced motion removes rings and rotation. Reduced motion and forced colors are covered in `src/styles.css`. Scrollbar colors share the existing palette; focus outlines use primary.
 
 Canonical interaction ownership and checks are maintained in `UX-CONTRACT.md` and `premium-ui.json`.

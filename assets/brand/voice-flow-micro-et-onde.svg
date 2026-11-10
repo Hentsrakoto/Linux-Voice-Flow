@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" fill="none">
+  <title>Voice Flow</title>
+  <g fill="#176a57">
+    <path fill-rule="evenodd" d="M233 250C233 196 272 153 331 153H362C417 153 460 196 460 250V365C460 437 416 488 347 488C278 488 233 437 233 365V250ZM298 238A19 19 0 0 0 298 276H395A19 19 0 0 0 395 238H298ZM298 310A19 19 0 0 0 298 348H395A19 19 0 0 0 395 310H298Z" clip-rule="evenodd"/>
+    <rect x="319" y="551" width="56" height="62"/>
+    <rect x="234" y="591" width="226" height="56" rx="28"/>
+    <rect x="499" y="269" width="39" height="76" rx="19.5"/>
+    <rect x="552" y="230" width="39" height="149" rx="19.5"/>
+    <rect x="604" y="269" width="39" height="76" rx="19.5"/>
+  </g>
+  <path d="M201 370V400C201 481 266 543 347 543C428 543 491 481 491 400V370" stroke="#176a57" stroke-width="45" stroke-linecap="round"/>
+</svg>

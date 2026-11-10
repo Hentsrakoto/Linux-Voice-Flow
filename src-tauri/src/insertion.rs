@@ -293,11 +293,12 @@ impl DesktopOutput for X11Output {
                 return Err(ErrorCode::Cancelled);
             }
             let mut chunk: String = characters.by_ref().take(CHUNK_CHARACTERS).collect();
-            // Let this small zero-delay block finish restoring modifiers. Cancellation
-            // is checked immediately afterwards; no subsequent block is launched.
+            // GTK/WebKit need time to process Unicode keymap changes. A zero-delay
+            // block loses accented characters on real X11 even if xdotool succeeds.
+            // Finish this small block restoring modifiers, then check cancellation.
             let result = run(
                 &tool,
-                &["type", "--clearmodifiers", "--delay", "0", "--file", "-"],
+                &["type", "--clearmodifiers", "--delay", "12", "--file", "-"],
                 Some(chunk.as_bytes()),
                 4096,
                 deadline.min(Instant::now() + TOOL_TIMEOUT),
@@ -361,7 +362,9 @@ impl DesktopOutput for X11Output {
                         break true;
                     }
                 }
-                Err(_) => break false,
+                // The first read can race selection acquisition. Retry only the
+                // acknowledgement, while our owner lives and within the deadline.
+                Err(_) => {}
             }
             thread::sleep(Duration::from_millis(5));
         };
@@ -528,6 +531,25 @@ esac
         .unwrap();
         fs::set_permissions(&tool, fs::Permissions::from_mode(0o700)).unwrap();
         tool
+    }
+
+    #[test]
+    fn clipboard_acquisition_retries_a_read_before_selection_is_ready() {
+        let (root, mut output) = output();
+        let tool = clipboard_tool(root.path());
+        let source = fs::read_to_string(&tool).unwrap().replace(
+            "cat clipboard ;;",
+            "if [ ! -f first-read ]; then touch first-read; exit 1; fi; cat clipboard ;;",
+        );
+        fs::write(&tool, source).unwrap();
+        output.xclip = Some(tool);
+        output.copy("texte privé").unwrap();
+        assert!(root.path().join("first-read").exists());
+        assert_eq!(
+            fs::read_to_string(root.path().join("clipboard")).unwrap(),
+            "texte privé"
+        );
+        assert!(output.clipboard_owner.is_some());
     }
 
     #[test]

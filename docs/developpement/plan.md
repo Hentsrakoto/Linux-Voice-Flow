@@ -325,3 +325,10 @@ Voir [les modèles locaux](../modeles.md), [la revue](revue-modeles.md), [le bil
 ## 11. Extension demandée : transcription Groq optionnelle
 
 Le 4 novembre 2026, ajout du choix Local/Groq, de la configuration backend par `.env` et de l’adaptateur API. Le mode local demeure proposé par défaut ; seul le fournisseur explicitement préparé peut transcrire. Le contrat, les tests et la recette utilisateur sont dans [le plan Groq](plan-groq.md) et [le bilan](bilan-groq.md). Cette extension ne réalise pas l’insertion T-07 ni la persistance T-08. L’appel réel Groq attend une clé et une dictée consentie de l’utilisateur.
+
+
+## Reprise T-07–T-08 — 10 novembre 2026
+
+L’implémentation de ces deux lots est présente dans `dictation.rs`, `focus.rs`, `insertion.rs`, `settings.rs`, `desktop.rs` et les vues React. Les sections précédentes sont des états historiques. La reprise finalise la vue Dictée (raccourci, état et résultat), les réglages dans une vue dédiée, les diagnostics actionnables, le brouillon conservé en navigation et le focus clavier. Les icônes Lucide sont embarquées via Iconify ; le skill UI/UX Pro Max a été appliqué en conservant le design existant.
+
+Les cas automatisés et les limites de recette sont consignés dans [bilan-t07-t08.md](bilan-t07-t08.md). Les cases mêlant implémentation et recette matérielle restent ouvertes tant que la dictée réelle au microphone dans un éditeur et un navigateur et les mesures NF-04 n’ont pas été réalisées. Ne pas reconstruire T-07/T-08 à la reprise : terminer leur recette native puis poursuivre T-09/T-10.

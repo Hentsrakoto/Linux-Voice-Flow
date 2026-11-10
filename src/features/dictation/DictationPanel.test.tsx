@@ -48,8 +48,49 @@ it('never presents the default shortcut as active when registration is absent', 
   expect(screen.getByText('Aucun raccourci actif')).toBeInTheDocument();
   expect(screen.queryByText('Espace')).not.toBeInTheDocument();
 });
+it('explains that a registered shortcut needs a prepared engine', () => {
+  const flow = runtime({ phase: 'unconfigured', engine_ready: false });
+  flow.hotkey = { ...flow.hotkey!, shortcut: 'control+alt+Space' };
+  const view = render(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByText('Ctrl')).toBeInTheDocument();
+  expect(screen.getByText('Alt')).toBeInTheDocument();
+  expect(screen.getByText('Préparez le moteur dans Réglages pour activer la dictée.')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Ouvrir les réglages' })).toBeEnabled();
+  expect(screen.queryByText(/Maintenez pour parler/)).not.toBeInTheDocument();
+  flow.hotkey = { ...flow.hotkey!, press_count: 1 };
+  view.rerender(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByText('Raccourci reçu. Préparez le moteur dans Réglages pour démarrer la dictée.')).toBeInTheDocument();
+});
 it('retains the partial insertion warning after fallback copying', () => {
   render(<DictationPanel flow={runtime({ phase: 'success', text: 'Bonjour', delivery: 'clipboard', error_code: 'CLIPBOARD_FAILED', insertion_uncertain: true, clipboard_owned: true })} openSettings={vi.fn()}/>);
   expect(screen.getByRole('status')).toHaveTextContent('Texte copié');
   expect(screen.getByRole('alert')).toHaveTextContent('Une partie du texte peut déjà être présente');
+});
+it('animates the microphone only after recording starts and stops when released', () => {
+  const flow = runtime();
+  const view = render(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByRole('img', { name: 'Microphone inactif' })).toBeInTheDocument();
+  flow.hotkey = { ...flow.hotkey!, held: true };
+  view.rerender(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByRole('img', { name: /Raccourci reçu/ })).toBeInTheDocument();
+  expect(view.container.querySelector('.microphone-halo')).not.toBeInTheDocument();
+  flow.snapshot = { ...flow.snapshot!, phase: 'recording', recording_ms: 250 };
+  view.rerender(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByRole('img', { name: 'Microphone actif : enregistrement en cours' })).toBeInTheDocument();
+  expect(view.container.querySelectorAll('.microphone-halo')).toHaveLength(2);
+  flow.hotkey = { ...flow.hotkey!, held: false };
+  flow.snapshot = { ...flow.snapshot!, phase: 'transcribing' };
+  view.rerender(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByRole('img', { name: 'Microphone inactif : traitement en cours' })).toBeInTheDocument();
+  expect(view.container.querySelector('.microphone-halo')).not.toBeInTheDocument();
+  flow.snapshot = { ...flow.snapshot!, phase: 'ready' };
+  view.rerender(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByRole('img', { name: 'Microphone inactif' })).toBeInTheDocument();
+});
+it('keeps the microphone inactive in browser preview even with a recording-shaped snapshot', () => {
+  const flow = runtime({ phase: 'recording' });
+  flow.native = false;
+  render(<DictationPanel flow={flow} openSettings={vi.fn()}/>);
+  expect(screen.getByRole('img', { name: 'Microphone inactif' })).toBeInTheDocument();
+  expect(screen.queryByRole('img', { name: /Microphone actif/ })).not.toBeInTheDocument();
 });

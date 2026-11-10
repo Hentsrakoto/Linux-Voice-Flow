@@ -6,7 +6,7 @@ const errors: Record<string, string> = {
   MIC_UNAVAILABLE: 'Microphone indisponible. Actualisez les microphones dans les réglages.',
   ENGINE_BUSY: 'Une dictée est en cours. Attendez sa fin ou annulez-la.',
   ENGINE_TIMEOUT: 'Le moteur n’a pas répondu à temps. Préparez-le à nouveau dans les réglages.',
-  ENGINE_CRASHED: 'Le moteur s’est arrêté. Préparez-le à nouveau dans les réglages.',
+  ENGINE_CRASHED: 'Le moteur Python est indisponible. Vérifiez l’installation des dépendances, puis préparez-le à nouveau dans les réglages.',
   PROTOCOL_ERROR: 'L’action ne peut pas être effectuée. Vérifiez les réglages et réessayez.',
   API_CONFIG_ERROR: 'Configuration Groq absente ou invalide. Vérifiez GROQ_API_KEY et GROQ_MODEL dans .env, puis préparez le moteur à nouveau.',
   API_AUTH_ERROR: 'Clé Groq refusée. Vérifiez GROQ_API_KEY dans .env, puis préparez le moteur à nouveau.',

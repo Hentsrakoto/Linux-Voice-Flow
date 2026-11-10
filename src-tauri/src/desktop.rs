@@ -7,7 +7,7 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use serde::Serialize;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
 use crate::dictation::{
@@ -136,35 +136,43 @@ fn parse_shortcut(shortcut: &str) -> Result<Shortcut, String> {
 }
 #[tauri::command]
 async fn replace_hotkey(app: AppHandle, shortcut: String) -> Result<HotkeyStatus, String> {
-    if let Ok(runtime) = runtime(&app) {
-        runtime.ensure_idle().map_err(|_| {
-            "Terminez ou annulez la dictée avant de modifier le raccourci.".to_owned()
-        })?;
-    }
+    let runtime = runtime(&app).map_err(|error| error.message)?;
     let parsed = parse_shortcut(&shortcut)?;
     let modifiers = parsed.mods;
     let shortcut = parsed.into_string();
-    tauri::async_runtime::spawn_blocking(move || {
-        let service: State<'_, HotkeyService> = app.state();
-        if !service.supported {
-            return Err("Ce prototype nécessite une session Cinnamon/X11.".to_owned());
-        }
-        let outcome = service
-            .manager
-            .lock()
-            .map_err(|_| "Gestionnaire du raccourci indisponible.".to_owned())?
-            .replace(&shortcut);
-        *service
-            .error
-            .lock()
-            .map_err(|_| "Diagnostic du raccourci indisponible.")? =
-            outcome.as_ref().err().map(ToString::to_string);
-        outcome.map_err(|error| error.to_string())?;
-        schedule_cancellation(&app, None, Some(modifiers));
-        service.snapshot()
-    })
-    .await
-    .map_err(|_| "Modification du raccourci interrompue.".to_owned())?
+    let owner = app.clone();
+    runtime
+        .apply_when_idle(move || {
+            let service = owner.state::<HotkeyService>();
+            if !service.supported {
+                return Err(RuntimeError {
+                    code: ErrorCode::ProtocolError,
+                    message: "Ce prototype nécessite une session Cinnamon/X11.".into(),
+                });
+            }
+            let outcome = service
+                .manager
+                .lock()
+                .map_err(|_| runtime_error(ErrorCode::ProtocolError))?
+                .replace(&shortcut);
+            *service
+                .error
+                .lock()
+                .map_err(|_| runtime_error(ErrorCode::ProtocolError))? =
+                outcome.as_ref().err().map(ToString::to_string);
+            outcome.map_err(|error| RuntimeError {
+                code: ErrorCode::ProtocolError,
+                message: error.to_string(),
+            })?;
+            schedule_cancellation(&owner, None, Some(modifiers));
+            if let Ok(status) = service.snapshot() {
+                let _ = owner.emit("hotkey://event", status);
+            }
+            Ok(())
+        })
+        .await
+        .map_err(|error| error.message)?;
+    get_hotkey_status(app).await
 }
 
 pub fn run() {
@@ -553,7 +561,7 @@ async fn get_diagnostics(app: AppHandle) -> Result<Diagnostics, RuntimeError> {
     let microphone_available = runtime
         .microphones()
         .await
-        .is_ok_and(|devices| !devices.is_empty());
+        .is_ok_and(|devices| crate::audio::microphone_available(&devices, &settings.microphone_id));
     let model_available = if settings.provider == crate::protocol::TranscriptionProvider::Groq {
         snapshot.engine_ready && snapshot.provider == settings.provider
     } else {

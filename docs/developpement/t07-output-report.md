@@ -23,3 +23,10 @@ Les premiers tests ont été écrits avant les types et fonctions : compilation 
 - `rustfmt --edition 2021 src-tauri/src/insertion.rs src-tauri/src/focus.rs` : appliqué.
 
 Les outils utilisés par ces tests sont des scripts isolés dans des dossiers temporaires. Aucun microphone, aucune API et aucune fenêtre utilisateur n’a été touché. La recette X11 réelle sur un serveur isolé est laissée à l’agent principal ; le présent rapport ne la revendique pas. Les tests et la compilation générale du contrôleur relèvent du lot B.
+
+
+## Correction vérifiée le 10 novembre 2026
+
+La recette Xvfb avec de vrais champs GTK/WebKit a révélé une perte des caractères Unicode avec le délai nul annoncé ci-dessus. Le test existant a échoué puis réussi après passage à `xdotool --delay 12`. Chaque bloc reste limité à 16 caractères, avec contrôle du focus et de l’annulation entre blocs, timeout outil 700 ms et global 10 s. Les paragraphes historiques mentionnant une frappe à délai nul sont donc remplacés par cette correction. Résultat : test d’intégration Unicode GTK et WebKit réussi sur serveur isolé :198 ; pas de microphone, API ou vrai chat utilisés. Voir `bilan-t07-t08.md`.
+
+La reprise a également corrigé une course d’acquisition du presse-papiers : une première lecture échouée n’interrompt plus immédiatement la vérification si le propriétaire est vivant et le délai non atteint. Seule la lecture est réessayée. Régression déterministe ajoutée ; suite finale native-audio : 76 unitaires +12 processus réussis.

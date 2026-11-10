@@ -173,6 +173,7 @@ enum Control {
     Copy(Reply),
     ClearClipboard(Reply),
     OutputDiagnostics(oneshot::Sender<OutputDiagnostics>),
+    IdleAction(Box<dyn FnOnce() -> Result<(), RuntimeError> + Send>, Reply),
     Options(
         OutputOptions,
         Box<dyn FnOnce() -> Result<(), RuntimeError> + Send>,
@@ -309,6 +310,15 @@ impl DictationService {
     ) -> Result<DictationSnapshot, RuntimeError> {
         self.ensure_idle()?;
         self.request(|reply| Control::Options(options, Box::new(apply), reply))
+            .await
+    }
+    /// Recheck inactivity on the actor before applying a runtime-only change.
+    pub async fn apply_when_idle(
+        &self,
+        apply: impl FnOnce() -> Result<(), RuntimeError> + Send + 'static,
+    ) -> Result<DictationSnapshot, RuntimeError> {
+        self.ensure_idle()?;
+        self.request(|reply| Control::IdleAction(Box::new(apply), reply))
             .await
     }
     pub async fn microphones(&self) -> Result<Vec<Microphone>, RuntimeError> {
@@ -467,13 +477,20 @@ impl Actor {
         options: OutputOptions,
         apply: impl FnOnce() -> Result<(), RuntimeError>,
     ) -> Result<DictationSnapshot, RuntimeError> {
+        self.apply_when_idle(apply)?;
+        self.options = options;
+        self.snapshot.auto_insert_enabled = options.auto_insert_enabled;
+        self.publish();
+        Ok(self.snapshot.clone())
+    }
+    fn apply_when_idle(
+        &mut self,
+        apply: impl FnOnce() -> Result<(), RuntimeError>,
+    ) -> Result<DictationSnapshot, RuntimeError> {
         if self.busy() {
             return Err(failure(ErrorCode::EngineBusy));
         }
         apply()?;
-        self.options = options;
-        self.snapshot.auto_insert_enabled = options.auto_insert_enabled;
-        self.publish();
         Ok(self.snapshot.clone())
     }
     fn clear_clipboard(&mut self) -> Result<DictationSnapshot, RuntimeError> {
@@ -996,6 +1013,10 @@ impl Actor {
                     Some(Control::Copy(reply)) => { let result = self.copy_result(); let _ = reply.send(result); }
                     Some(Control::ClearClipboard(reply)) => { let result = self.clear_clipboard(); let _ = reply.send(result); }
                     Some(Control::OutputDiagnostics(reply)) => { let _ = reply.send(self.output.diagnostics()); }
+                    Some(Control::IdleAction(apply, reply)) => {
+                        let result = self.apply_when_idle(apply);
+                        let _ = reply.send(result);
+                    }
                     Some(Control::Options(options, apply, reply)) => {
                         let result = self.update_options(options, apply);
                         let _ = reply.send(result);
@@ -1187,6 +1208,13 @@ mod tests {
             actor.snapshot.phase = phase;
             assert_eq!(
                 actor
+                    .apply_when_idle(|| panic!("must not replace shortcut during session"))
+                    .unwrap_err()
+                    .code,
+                ErrorCode::EngineBusy
+            );
+            assert_eq!(
+                actor
                     .update_options(changed, || panic!("must not apply settings during session"))
                     .unwrap_err()
                     .code,
@@ -1200,6 +1228,56 @@ mod tests {
         assert!(!actor.options.auto_insert_enabled);
         actor.update_options(changed, || Ok(())).unwrap();
         assert!(actor.snapshot.auto_insert_enabled);
+    }
+    #[tokio::test]
+    async fn idle_action_rechecks_state_after_queueing_before_changing_shortcut() {
+        let (mut actor, _root) = actor();
+        actor.snapshot.phase = Phase::Ready;
+        actor.publish();
+        let (tx, mut rx) = mpsc::channel(1);
+        let service = DictationService {
+            tx,
+            stopping: Arc::default(),
+            urgent_cancel: Arc::default(),
+            input_epoch: Arc::default(),
+            worker: Mutex::new(None),
+            busy_guard: actor.busy_guard.clone(),
+        };
+        let applied = Arc::new(AtomicBool::new(false));
+        let callback_applied = applied.clone();
+        let pending = tokio::spawn(async move {
+            service
+                .apply_when_idle(move || {
+                    callback_applied.store(true, Ordering::SeqCst);
+                    Ok(())
+                })
+                .await
+        });
+        // The caller observed Ready and queued its change. A dictation starts
+        // before the actor executes that change: the second check must reject it.
+        let command = rx.recv().await.unwrap();
+        actor.snapshot.phase = Phase::Recording;
+        actor.publish();
+        match command {
+            Control::IdleAction(apply, reply) => {
+                let _ = reply.send(actor.apply_when_idle(apply));
+            }
+            _ => panic!("expected serialized idle action"),
+        }
+        assert_eq!(
+            pending.await.unwrap().unwrap_err().code,
+            ErrorCode::EngineBusy
+        );
+        assert!(!applied.load(Ordering::SeqCst));
+        actor.snapshot.phase = Phase::Ready;
+        actor
+            .apply_when_idle(|| {
+                applied.store(true, Ordering::SeqCst);
+                Ok(())
+            })
+            .unwrap();
+        assert!(applied.load(Ordering::SeqCst));
+        assert!(!actor.options.auto_insert_enabled);
     }
     #[tokio::test]
     async fn commands_received_while_inserting_are_rejected_without_queueing() {
@@ -1221,6 +1299,14 @@ mod tests {
         );
         assert_eq!(
             service.clear().await.unwrap_err().code,
+            ErrorCode::EngineBusy
+        );
+        assert_eq!(
+            service
+                .apply_when_idle(|| panic!("busy shortcut change must not be queued"))
+                .await
+                .unwrap_err()
+                .code,
             ErrorCode::EngineBusy
         );
         assert_eq!(

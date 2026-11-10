@@ -66,13 +66,20 @@ export function useVoiceFlow(native: boolean) {
         ]);
         if (!active) return;
         setInfo(result[0]); setSettingsState(result[1]); accept(result[2]); acceptHotkey(result[3]);
-        void refreshLists(); void refreshDiagnostics();
+        void refreshLists();
       } catch { if (active) setError('Impossible de vérifier l’application. Réessayez ou relancez la fenêtre.'); }
       finally { if (active) setLoading(false); }
     }
     void connect();
     return () => { active = false; alive.current = false; subscriptions.forEach(stop => stop()); };
   }, [native, attempt, accept, acceptHotkey, refreshLists, refreshDiagnostics]);
+  const phase = snapshot?.phase;
+  const provider = snapshot?.provider;
+  useEffect(() => {
+    if (native && !loading && phase && !['loading_engine', 'recording', 'transcribing', 'inserting', 'cancelling'].includes(phase)) {
+      void refreshDiagnostics();
+    }
+  }, [native, loading, phase, provider, refreshDiagnostics]);
   const busy = pending || !!snapshot && ['loading_engine', 'recording', 'transcribing', 'inserting', 'cancelling'].includes(snapshot.phase);
   async function run(command: string) {
     setPending(true); setError(null);

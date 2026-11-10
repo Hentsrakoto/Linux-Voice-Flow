@@ -4,6 +4,8 @@ import clipboard from '@iconify-icons/lucide/clipboard';
 import check from '@iconify-icons/lucide/check';
 import trash from '@iconify-icons/lucide/trash-2';
 import settings from '@iconify-icons/lucide/settings-2';
+import fileText from '@iconify-icons/lucide/file-text';
+import MicrophoneActivity from './MicrophoneActivity';
 import ShortcutKeys from '../../shared/ui/ShortcutKeys';
 import { errorMessage } from '../../shared/runtime/messages';
 import type { VoiceFlow } from '../../shared/runtime/useVoiceFlow';
@@ -19,13 +21,18 @@ export default function DictationPanel({ flow, openSettings }: { flow: VoiceFlow
   const shortcut = !native ? 'Ctrl+Alt+Space' : hotkey?.shortcut;
   const hasResult = snapshot?.text != null;
   const delivery = snapshot?.delivery ?? 'preview';
+  const preparationHelp = hotkey?.press_count ? 'Raccourci reçu. Préparez le moteur dans Réglages pour démarrer la dictée.' : 'Préparez le moteur dans Réglages pour activer la dictée.';
   return <div className="dictation-workspace">
-    <div className="page-heading"><p className="eyebrow">Votre espace de dictée</p><h1>Dictez dans votre application.</h1><p className="page-description">Placez le curseur dans votre chat ou votre éditeur. Votre raccourci fait le reste.</p></div>
+    <div className="page-heading dictation-heading"><h1>Dictée</h1><p className="page-description">Placez le curseur dans votre application, puis maintenez votre raccourci.</p></div>
     <section className="shortcut-panel" aria-labelledby="dictation-state">
-      <div className="flex items-center justify-between gap-4 flex-wrap"><div className="state-label"><span className={`state-dot${snapshot?.engine_ready ? ' is-ready' : ''}`} aria-hidden="true"/><h2 id="dictation-state" aria-live="polite">{status}</h2></div><Icon icon={mic} width={24} aria-hidden="true" className="text-primary"/></div>
-      {shortcut ? <><ShortcutKeys shortcut={shortcut}/><p className="shortcut-instruction">Maintenez pour parler. Relâchez pour transcrire{snapshot?.auto_insert_enabled !== false ? ' et insérer' : ''}.</p></> : <p className="shortcut-unavailable">{flow.loading ? 'Vérification du raccourci…' : 'Aucun raccourci actif'}</p>}
+      <div className="state-label"><span className={`state-dot${snapshot?.engine_ready ? ' is-ready' : ''}`} aria-hidden="true"/><h2 id="dictation-state" aria-live="polite">{status}</h2></div>
+      <div className="dictation-trigger">
+        <MicrophoneActivity native={native} phase={snapshot?.phase} shortcutHeld={!!hotkey?.held}/>
+        {shortcut ? <ShortcutKeys shortcut={shortcut}/> : <p className="shortcut-unavailable">{flow.loading ? 'Vérification du raccourci…' : hotkey ? 'Aucun raccourci actif' : 'Raccourci non vérifié'}</p>}
+      </div>
+      {shortcut && <p className="shortcut-instruction">{native && !snapshot?.engine_ready && !active ? preparationHelp : <>Maintenez pour parler. Relâchez pour transcrire{snapshot?.auto_insert_enabled !== false ? ' et insérer' : ''}.</>}</p>}
       {!native && <p className="field-help">Ouvrez l’application desktop pour dicter. Aucun microphone ni raccourci global n’est actif dans cet aperçu.</p>}
-      {native && !hotkey?.shortcut && !flow.loading && <p role="alert">Le raccourci n’est pas disponible. Vérifiez sa configuration dans les réglages.</p>}
+      {native && hotkey && !hotkey.shortcut && !flow.loading && <p role="alert">Le raccourci n’est pas disponible. Vérifiez sa configuration dans les réglages.</p>}
       {snapshot?.engine_ready && <p className="service-indicator">{provider === 'groq' ? 'Groq · audio envoyé au service' : 'Local · audio traité sur cet ordinateur'}</p>}
       {snapshot?.phase === 'recording' && <p className="field-help">Microphone actif · {(snapshot.recording_ms / 1000).toFixed(1)} s / 60 s</p>}
       {snapshot?.phase === 'ready' && snapshot.error_code === 'NO_SPEECH' && <p role="status">{errorMessage('NO_SPEECH')}</p>}
@@ -37,7 +44,7 @@ export default function DictationPanel({ flow, openSettings }: { flow: VoiceFlow
       </div>
     </section>
     <section className="result-panel" aria-labelledby="result-title">
-      <div className="flex items-center justify-between gap-4"><h2 id="result-title">Votre transcription</h2>{hasResult && <span className="result-retention">Éphémère · 120 s</span>}</div>
+      <div className="result-heading"><h2 id="result-title"><Icon icon={fileText} width={18} aria-hidden="true"/>Votre transcription</h2>{hasResult && <span className="result-retention">Éphémère · 120 s</span>}</div>
       {hasResult ? <>
         <label htmlFor="transcribed-text" className="sr-only">Texte transcrit</label>
         <textarea className="resize-none transcription-text" id="transcribed-text" readOnly value={snapshot.text ?? ''} rows={6}/>
