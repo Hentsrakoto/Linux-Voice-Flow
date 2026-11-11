@@ -1,6 +1,32 @@
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn microphone(id: &str) -> Microphone {
+        Microphone {
+            id: id.into(),
+            name: id.into(),
+            is_default: id == "default",
+        }
+    }
+    #[test]
+    fn microphone_diagnostic_requires_the_selected_device() {
+        assert!(!microphone_available(&[], "default"));
+        let devices = [microphone("name:USB")];
+        assert!(!microphone_available(&devices, "default"));
+        assert!(!microphone_available(&devices, "name:Disconnected"));
+        assert!(microphone_available(&devices, "name:USB"));
+        assert!(microphone_available(&[microphone("default")], "default"));
+    }
+    #[test]
+    fn microphone_diagnostic_rejects_ambiguous_device_names() {
+        let devices = [
+            microphone("default"),
+            microphone("name:USB"),
+            microphone("name:USB"),
+        ];
+        assert!(microphone_available(&devices, "default"));
+        assert!(!microphone_available(&devices, "name:USB"));
+    }
     #[test]
     fn downmix_clips_and_rejects_nonfinite() {
         let b = normalize(&[2.0, 2.0, -2.0, -2.0], 2, 16000).unwrap();
@@ -104,6 +130,11 @@ pub struct Microphone {
     pub id: String,
     pub name: String,
     pub is_default: bool,
+}
+
+/// A selected microphone must exist and resolve unambiguously, like capture does.
+pub fn microphone_available(devices: &[Microphone], selected: &str) -> bool {
+    devices.iter().filter(|device| device.id == selected).count() == 1
 }
 
 /// Normalize outside the realtime callback. Sinc filtering prevents aliases when downsampling.

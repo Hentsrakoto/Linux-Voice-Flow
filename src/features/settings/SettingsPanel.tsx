@@ -1,16 +1,22 @@
 import { useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { Dispatch, KeyboardEvent, SetStateAction } from 'react';
 import { Icon } from '@iconify/react/offline';
 import keyboard from '@iconify-icons/lucide/keyboard';
 import refresh from '@iconify-icons/lucide/refresh-cw';
 import check from '@iconify-icons/lucide/check';
+import audioLines from '@iconify-icons/lucide/audio-lines';
+import shield from '@iconify-icons/lucide/shield-check';
+import activity from '@iconify-icons/lucide/activity';
 import type { Settings } from '../../shared/ipc/runtime';
 import { defaultSettings } from '../../shared/ipc/runtime';
 import type { VoiceFlow } from '../../shared/runtime/useVoiceFlow';
 import { errorMessage } from '../../shared/runtime/messages';
 
-export default function SettingsPanel({ flow }: { flow: VoiceFlow }) {
-  const [editedSettings, setDraft] = useState<Settings | null>(null);
+export default function SettingsPanel({ flow, editedSettings, setDraft }: {
+  flow: VoiceFlow;
+  editedSettings: Settings | null;
+  setDraft: Dispatch<SetStateAction<Settings | null>>;
+}) {
   const draft = editedSettings ?? flow.settingsState?.settings ?? defaultSettings;
   const [custom, setCustom] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -45,7 +51,7 @@ export default function SettingsPanel({ flow }: { flow: VoiceFlow }) {
     {flow.snapshot && ['loading_engine', 'recording', 'transcribing', 'inserting', 'cancelling'].includes(flow.snapshot.phase) && <button type="button" className="button" disabled={flow.snapshot.phase === 'cancelling'} onClick={() => { void flow.run('cancel_dictation'); }}>Annuler</button>}
     {flow.snapshot?.phase === 'error' && <p role="alert" className="inline-message">{errorMessage(flow.snapshot.error_code, flow.snapshot.provider)}</p>}
     <form onSubmit={event => { void submit(event); }} noValidate aria-busy={flow.pending}>
-      <fieldset className="settings-section" disabled={disabled}><legend>Transcription</legend>
+      <fieldset className="settings-section" disabled={disabled}><legend><Icon icon={audioLines} width={18} aria-hidden="true"/>Transcription</legend>
         <label htmlFor="provider">Service de transcription</label>
         <select id="provider" value={draft.provider} onChange={event => change('provider', event.target.value as Settings['provider'])}><option value="local">Local — sur cet ordinateur</option><option value="groq">Groq — API</option></select>
         {draft.provider === 'groq' ? <div className="service-notice"><p>L’audio sera envoyé à Groq pour transcription. Une connexion Internet et votre clé API sont nécessaires.</p><p className="field-help">Renseignez GROQ_API_KEY et GROQ_MODEL dans .env à la racine du projet. Votre clé reste dans le moteur et n’est jamais affichée ici.</p></div> : <>
@@ -61,12 +67,12 @@ export default function SettingsPanel({ flow }: { flow: VoiceFlow }) {
         <button className="button button-quiet" type="button" onClick={() => { void flow.refreshLists(); }}><Icon icon={refresh} width={15} aria-hidden="true"/>Actualiser les appareils et modèles</button>
         {flow.listError && <p role="alert">Une liste n’a pas pu être chargée. Actualisez les appareils et modèles pour réessayer.</p>}
       </fieldset>
-      <fieldset className="settings-section" disabled={disabled}><legend>Raccourci</legend>
+      <fieldset className="settings-section" disabled={disabled}><legend><Icon icon={keyboard} width={18} aria-hidden="true"/>Raccourci</legend>
         <label htmlFor="shortcut">Raccourci de dictée</label><div className="shortcut-editor"><input id="shortcut" value={draft.shortcut} onChange={event => change('shortcut', event.target.value)} spellCheck={false} autoComplete="off"/><button type="button" className="button" aria-pressed={capturing} onClick={() => setCapturing(value => !value)} onKeyDown={capture} onBlur={() => setCapturing(false)}><Icon icon={keyboard} width={17} aria-hidden="true"/>{capturing ? 'Appuyez sur les touches…' : 'Saisir au clavier'}</button></div>
         <p className="field-help">Maintenir pour parler, relâcher pour transcrire. Associez une touche à Ctrl, Alt ou Super. Échap est réservé à l’annulation.</p>
         {flow.hotkey?.shortcut && <p className="field-help">Raccourci actif : <code>{flow.hotkey.shortcut}</code></p>}
       </fieldset>
-      <fieldset className="settings-section" disabled={disabled}><legend>Insertion et confidentialité</legend>
+      <fieldset className="settings-section" disabled={disabled}><legend><Icon icon={shield} width={18} aria-hidden="true"/>Insertion et confidentialité</legend>
         <label className="check-row"><input type="checkbox" checked={draft.auto_insert_enabled} onChange={event => change('auto_insert_enabled', event.target.checked)}/><span>Insérer automatiquement dans le champ ciblé<small>Seulement si la fenêtre et le focus n’ont pas changé. Aucun message de chat n’est envoyé.</small></span></label>
         <label className="check-row"><input type="checkbox" checked={draft.clipboard_auto_copy_consent} onChange={event => change('clipboard_auto_copy_consent', event.target.checked)}/><span>Copier automatiquement si l’insertion échoue<small>J’autorise le remplacement du contenu du presse-papiers. Sinon, le bouton Copier reste une action explicite.</small></span></label>
         <p className="field-help">X11 ne détecte pas toujours un changement de curseur dans la même fenêtre. Désactivez l’insertion automatique si vous préférez coller vous-même.</p>
@@ -76,10 +82,17 @@ export default function SettingsPanel({ flow }: { flow: VoiceFlow }) {
       {saved && <p role="status" className="saved-message"><Icon icon={check} width={17} aria-hidden="true"/>Réglages enregistrés.{flow.snapshot?.engine_ready ? ' Le moteur est prêt.' : ''}</p>}
       <div className="settings-save"><button type="submit" className="button button-primary" disabled={disabled}>{flow.pending ? 'Enregistrement…' : 'Enregistrer et préparer'}</button><p className="field-help">Le nouveau service est appliqué après préparation. Aucun microphone ne démarre pendant l’enregistrement des réglages.</p></div>
     </form>
-    <details className="diagnostics"><summary>Diagnostic de l’application</summary><div className="diagnostics-content">
+    <details className="diagnostics"><summary><Icon icon={activity} width={18} aria-hidden="true"/>Diagnostic de l’application</summary><div className="diagnostics-content">
       {flow.diagnostics ? <dl>{([['x11_supported', 'Session X11'], ['microphone_available', 'Microphone'], ['model_available', 'Modèle ou configuration'], ['engine_ready', 'Moteur prêt'], ['xdotool_available', 'Insertion X11'], ['xclip_available', 'Presse-papiers']] as const).map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{flow.diagnostics?.[key] ? 'Disponible' : 'À vérifier'}</dd></div>)}</dl> : <p>{flow.native ? 'Diagnostic en cours de vérification…' : 'Diagnostic disponible dans l’application desktop.'}</p>}
       {flow.diagnosticError && <p role="alert">Le diagnostic n’a pas pu être chargé. Réessayez.</p>}
-      <button className="button button-quiet" disabled={!flow.native || flow.pending} onClick={() => { void flow.refreshDiagnostics(); }}>Actualiser le diagnostic</button>
+      {flow.diagnostics && <ul className="diagnostic-help">
+        {!flow.diagnostics.x11_supported && <li>Ouvrez une session X11 pour utiliser le raccourci global et l’insertion.</li>}
+        {!flow.diagnostics.microphone_available && <li>Branchez le microphone sélectionné ou choisissez un autre appareil, puis actualisez les appareils.</li>}
+        {!flow.diagnostics.model_available && <li>Vérifiez le dossier du modèle local ou la configuration Groq, puis enregistrez et préparez le moteur.</li>}
+        {!flow.diagnostics.xdotool_available && <li>Installez xdotool pour activer l’insertion dans votre application.</li>}
+        {!flow.diagnostics.xclip_available && <li>Installez xclip pour utiliser la copie dans le presse-papiers.</li>}
+      </ul>}
+      <button className="button button-quiet" disabled={!flow.native || flow.busy} onClick={() => { void flow.refreshDiagnostics(); }}><Icon icon={refresh} width={16} aria-hidden="true"/>Actualiser le diagnostic</button>
     </div></details>
   </div>;
 }

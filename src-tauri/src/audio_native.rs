@@ -99,11 +99,14 @@ struct Session {
 }
 fn devices() -> Result<Vec<Microphone>, AudioError> {
     let host = cpal::default_host();
-    let mut result = vec![Microphone {
-        id: "default".into(),
-        name: "Microphone par défaut du système".into(),
-        is_default: true,
-    }];
+    let mut result = Vec::new();
+    if host.default_input_device().is_some() {
+        result.push(Microphone {
+            id: "default".into(),
+            name: "Microphone par défaut du système".into(),
+            is_default: true,
+        });
+    }
     for device in host
         .input_devices()
         .map_err(|_| AudioError::new("audio_device", "Cannot enumerate microphones"))?

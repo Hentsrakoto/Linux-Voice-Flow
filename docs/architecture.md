@@ -58,3 +58,12 @@ Le relais global conserve la distinction appui/relâchement sans verrou bloquant
 L’UI reçoit `dictation://state` et ses révisions, sans chemin audio. Elle affiche des messages contrôlés à partir de codes et d’un motif `recording_limit`, sans recopier les diagnostics arbitraires du moteur. Le texte du résultat est sélectionnable et effaçable, avec une rétention de 120 secondes. La capture et la transcription sont maintenant intégrées ; l’insertion X11, le suivi du focus, le presse-papiers et les réglages persistants ne le sont pas encore.
 
 Les sections précédentes décrivent l’état du socle T-01–T-03 au moment de sa livraison. Pour l’état courant, ce complément et le bilan T-04–T-06 prévalent.
+
+
+## Incrément T-07–T-08
+
+Le contrôleur utilise `DesktopOutput` : capture de la fenêtre active et du focus enfant X11, insertion `xdotool` par blocs UTF-8 et copie consentie via un propriétaire `xclip`. Le texte passe sur stdin, sans shell. Annulation et génération sont revérifiées ; aucune nouvelle tentative automatique après insertion incertaine. Le curseur dans une même fenêtre reste une limite documentée. Les réponses en retard ne sont pas livrées une seconde fois.
+
+`settings.rs` sauvegarde atomiquement la configuration privée versionnée et la restaure au lancement. Les changements de réglages et l’ancienne commande de raccourci sont sérialisés avec les démarrages de dictée. React dispose des vues Dictée et Réglages ; le brouillon survit à la navigation. Les diagnostics et les choix Local/Groq, modèle, microphone, langue et raccourci sont dans Réglages. La vue Dictée montre le raccourci enregistré, l’état et le résultat éphémère, avec copie/effacement et annulation. Ces éléments remplacent les anciennes descriptions de fonctionnalités encore futures dans les sections historiques ci-dessus.
+
+Le code et les tests automatisés ne remplacent pas la recette microphone réel, éditeur et navigateur sur Cinnamon/X11. Voir `docs/developpement/bilan-t07-t08.md` pour les validations de la reprise.

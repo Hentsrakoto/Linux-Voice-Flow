@@ -75,3 +75,23 @@ Validation finale : Python 79/1 sauté/77 sous-tests, React30, Rust45+12 ; compi
 ### Diagnostic réel Groq après configuration utilisateur
 
 Faux refus de clé reproduit : HTTP 403 avec le client urllib par défaut, HTTP 200 avec un User-Agent d’application explicite sur la même clé. Correction du header et séparation de 401/403 ; notice Échap dédoublonnée. Test réel de l’endpoint de transcription réussi avec silence synthétique, aucun micro ni audio personnel. Clé jamais imprimée ni modifiée. Python79/1 sauté/77 sous-tests, React30, typecheck/lint/build réussis. Rapport `groq-auth-fix.md`. Recette de parole au microphone encore à faire ; inscription native d’Échap inchangée.
+
+
+## Finalisation T-07–T-08 — 10 novembre 2026
+
+Vues Dictée et Réglages finalisées selon la demande avec UI/UX Pro Max et icônes Iconify/Lucide embarquées. Brouillon de réglages conservé lors de la navigation, focus clavier explicite et diagnostics actionnables rafraîchis. Documentation utilisateur actualisée. Vérifications : React30, typecheck/lint/build, affichages Chromium 900/360 px et audit Axe sans violation sur aperçu ; Rust76 unitaires +12 processus avec native-audio. Recette réelle de frappe synthétique sur Xvfb :198 dans GTK/WebKit : un défaut de perte Unicode à délai nul reproduit et corrigé par un délai de 12 ms, test rouge puis vert. Bilan `bilan-t07-t08.md`, protocole `tests/manual/README.md`.
+
+Ces validations ne constituent pas encore J2 : dictée au microphone dans un éditeur/navigateur réels, redémarrage desktop et mesure NF-04 restent à recetter sur Cinnamon/X11. Le build desktop complet et la distribution autonome restent distincts. Aucun audio personnel ni appel Groq pendant cette reprise.
+
+
+## Diagnostic du raccourci sur le nouveau poste
+
+Le moteur Python du projet était absent, alors que les réglages Groq étaient déjà enregistrés. `.venv` et les 23 dépendances runtime verrouillées ont été installés ; téléchargements repris après interruptions et SHA-256 des roues vérifiés. `pip check`, VAD réel sur silence avec réseau Python bloqué et CLI Groq `ready` réussis, sans microphone ni appel à l’API audio. L’UI explique la préparation nécessaire et affiche un retour lorsqu’un événement de raccourci est reçu ; libellés canoniques control/alt normalisés. React31, typecheck/lint/build et compilation desktop complète hors ligne réussis. Rapport `diagnostic-raccourci-python.md`. L’application déjà ouverte doit être préparée à nouveau via Enregistrer et préparer.
+
+## Microphone animé et identité — 10 novembre 2026
+
+Choix utilisateur : logo sobre, vert et arrondi, micro avec onde de voix. Réalisation via les skills drawing-from-references (SVG Lab) et design-brand-identity ; dessin SVG manuel depuis référence, export éditable, déclinaisons sans modification de géométrie pour en-tête, favicon et icône native. Guide : `docs/brand-identity.md`.
+
+`MicrophoneActivity` distingue réception du raccourci, capture confirmée et traitement. Les halos apparaissent seulement pendant `recording` natif ; aucune simulation de volume. Réduction des mouvements : état lisible sans halos ni rotation. L’aperçu navigateur reste inactif.
+
+Vérifications : 33 tests React réussis, typecheck/lint/build et cargo check verrouillé hors ligne réussis ; contrôle Chromium 900/360 px sans débordement, Axe sans violation sur les deux vues. Transitions reçu/capture/traitement/repos et réduction des mouvements contrôlées dans le navigateur avec props de test isolées. Aucun microphone ni appel audio API utilisé dans cette validation ; recette native du raccourci à effectuer dans l’application desktop.

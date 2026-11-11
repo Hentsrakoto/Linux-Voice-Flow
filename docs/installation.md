@@ -13,7 +13,7 @@ Pour Mint basé sur Ubuntu/Debian, installer les paquets système nécessaires s
 
 ```bash
 sudo apt update
-sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libasound2-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev python3-venv pkg-config
+sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libasound2-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev python3-venv pkg-config xdotool xclip
 ```
 
 Cette commande est destinée à l’utilisateur ; elle n’a pas été exécutée automatiquement sur le système pendant l’implémentation.
@@ -49,6 +49,12 @@ rustc --version
 
 Rust et Cargo sont alors conservés dans `~/.rustup` et `~/.cargo`. Si le terminal courant utilisait encore les anciens exports, exécuter `unset RUSTUP_HOME CARGO_HOME` puis `source "$HOME/.cargo/env"` avant `npm run tauri dev`. L’installation ne met pas à jour les variables d’un terminal déjà ouvert. Le premier lancement peut encore télécharger les dépendances Cargo et compiler le projet.
 
+### Correction du poste actuel — 10 novembre 2026
+
+La chaîne Rust utilisée par les tests dans `/tmp/lvf-cargo` et `/tmp/lvf-rustup` a été déplacée durablement vers `~/.cargo` et `~/.rustup`. `~/.cargo/env` charge le nouveau chemin ; `~/.zshrc` le source pour les nouveaux terminaux. Une sauvegarde de ce dernier a été conservée dans `~/.zshrc.lvf-backup-2026-11-10`. Cargo/Rust 1.99.1 et `cargo metadata --no-deps --format-version 1` ont été vérifiés dans un nouveau zsh interactif.
+
+Dans un terminal déjà ouvert, exécuter `source "$HOME/.cargo/env"` avant de relancer Tauri. Sur ce poste, les paquets de développement WebKit/GTK, ALSA, libxdo, appindicator et librsvg ainsi que xdotool doivent encore être installés avec la commande sudo ci-dessus. La résolution de Cargo ne remplace pas ces prérequis natifs.
+
 ## Frontend et Tauri
 
 ```bash
@@ -62,9 +68,13 @@ Le port Vite est fixé à **1420**. Il doit être libre. Le serveur est local ; 
 npm run tauri dev
 ```
 
-La fenêtre indique « Linux Voice Flow » et propose la préparation de la dictée. Choisir un modèle local, le microphone et la langue, puis cliquer sur « Préparer le moteur ». Quand le moteur est prêt, maintenir le raccourci pour parler et le relâcher pour transcrire. Le résultat apparaît uniquement dans l’application ; l’insertion dans les autres fenêtres relève de T-07.
+Ouvrez **Réglages** pour choisir Local/Groq, le modèle local, le microphone, la langue et le raccourci. Cliquez sur **Enregistrer et préparer**. Les paramètres sont conservés dans `settings.json` du répertoire de configuration Tauri (`app_config_dir()`), avec les permissions 0600 ; ils ne contiennent ni clé API, ni audio, ni transcription.
 
-Pour utiliser le service externe Groq, suivez [la configuration API](groq.md) : copiez `.env.exemple` en `.env`, renseignez `GROQ_API_KEY` et `GROQ_MODEL`, puis choisissez Groq et préparez le moteur. Le mode local reste proposé au démarrage ; seul le mode Groq transmet l’audio au fournisseur.
+Dans **Dictée**, attendez « Prêt à dicter », placez le curseur dans le champ d’une application externe, maintenez le raccourci pour parler, puis relâchez. L’insertion automatique exige que la fenêtre et le focus X11 n’aient pas changé. Le texte est aussi disponible pendant 120 secondes dans l’application. En cas d’insertion incertaine, vérifiez le champ avant de copier et coller pour éviter les doublons. La copie automatique est désactivée par défaut ; le bouton **Copier** est une action explicite. **Effacer ma copie du presse-papiers** agit uniquement sur le processus propriétaire de notre copie ; un gestionnaire tiers peut conserver son historique.
+
+Le diagnostic est accessible dans **Réglages → Diagnostic de l’application**. Les binaires **xdotool** et **xclip** sont nécessaires respectivement à l’insertion et à la copie. Sous Wayland, ce parcours global n’est pas garanti. Un changement de champ dans une même fenêtre peut rester indétectable : désactivez l’insertion automatique si nécessaire.
+
+Pour Groq, suivez [la configuration API](groq.md) : renseignez `GROQ_API_KEY` et `GROQ_MODEL` dans `.env`, puis sélectionnez Groq dans Réglages et enregistrez. Seul ce mode transmet l’audio au fournisseur ; le service sauvegardé est préparé au prochain lancement, sans démarrer le microphone.
 
 Contrôles :
 
@@ -130,11 +140,11 @@ Le développement utilise le Python de `.venv/bin/python` à la racine du dépô
 ```
 
 1. Lancer `npm run tauri dev` dans le terminal où `cargo --version` fonctionne.
-2. Dans « Dictée locale », saisir le chemin **absolu et canonique**, sans symlink, du répertoire CTranslate2 complet, choisir microphone et langue, puis « Préparer le moteur ».
+2. Dans **Réglages**, sélectionner le service et le modèle local ou saisir son chemin **absolu et canonique**, sans symlink ; choisir microphone et langue, puis **Enregistrer et préparer**.
 3. Attendre « Prêt à dicter ». Aucun microphone n’est ouvert pendant cette préparation.
-4. Maintenir le raccourci actif (initialement `Ctrl+Alt+Space`), parler puis relâcher. Lire le texte dans la zone de résultat.
+4. Maintenir le raccourci actif (initialement `Ctrl+Alt+Space`), parler puis relâcher. Le texte est inséré si la cible X11 est inchangée ; il reste également visible dans la zone de résultat.
 5. Tester « Annuler » pendant la capture et la transcription ; Échap est également demandé globalement pendant les opérations actives. Avec les modificateurs maintenus, utiliser aussi ces modificateurs avec Échap. Si l’inscription d’Échap échoue, la notice indique d’utiliser le bouton.
-6. Vérifier « Effacer » et l’effacement automatique du résultat après 120 secondes. Les réglages du panneau sont limités à la session ; leur sauvegarde viendra en T-08.
+6. Vérifier « Effacer » et l’effacement automatique du résultat après 120 secondes. Les réglages sont persistants depuis T-08 ; le formulaire en cours est également conservé lors des allers-retours entre Dictée et Réglages.
 
 Les WAV sont privés dans le sous-répertoire `audio` du cache utilisateur Tauri, ouverts seulement après relâchement pour le transport Python et supprimés à chaque issue. Une instance possède son marqueur/verrou ; les restes d’une instance abandonnée sont nettoyés au prochain démarrage. Le chemin exact suit `app_cache_dir()` de Tauri ; aucun chemin audio n’est envoyé à React.
 

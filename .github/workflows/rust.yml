@@ -12,11 +12,27 @@ env:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: npm
+    - name: Install native dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev build-essential pkg-config libxdo-dev libasound2-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev python3
+    - name: Prepare Rust
+      run: |
+        rustup toolchain install stable --profile minimal
+        rustup default stable
+    - name: Build frontend assets
+      run: |
+        npm ci
+        npm run build
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --manifest-path src-tauri/Cargo.toml --locked --verbose
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --manifest-path src-tauri/Cargo.toml --locked --verbose

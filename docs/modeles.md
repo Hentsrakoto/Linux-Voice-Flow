@@ -1,6 +1,6 @@
 # Modèles locaux
 
-Le catalogue propose deux modèles Whisper multilingues (français et anglais) : **Tiny**, choix par défaut adapté au CPU et à la mémoire disponible, et **Base**, plus lourd. **Tiny est installé dans cette copie du projet ; Base reste facultatif et doit être installé explicitement.** L'application utilise le CPU en `int8`. La qualité relative doit être mesurée avec vos propres enregistrements consentis ; le test de silence ne mesure pas la précision.
+Le catalogue propose deux modèles Whisper multilingues (français et anglais) : **Tiny**, choix par défaut adapté au CPU et à la mémoire disponible, et **Base**, plus lourd. **Les modèles ne sont pas inclus dans Git : Tiny et Base doivent être installés explicitement sur chaque poste.** L'application utilise le CPU en `int8`. La qualité relative doit être mesurée avec vos propres enregistrements consentis ; le test de silence ne mesure pas la précision.
 
 Le catalogue versionné `config/models.json` épingle les révisions officielles Systran. Les poids, tokenizers et reçus restent dans `models/<id>/`, ignoré par Git. Aucun téléchargement n'est déclenché au démarrage ni pendant une dictée.
 
@@ -23,7 +23,7 @@ L'installateur utilise l'accès public Hugging Face sans jeton (`token=False`), 
 
 Si le transport Xet ne progresse pas sur votre connexion, interrompez uniquement l'installateur et relancez-le avec `HF_HUB_DISABLE_XET=1 .venv/bin/python scripts/install_models.py base` pour utiliser HTTPS. Le dossier final ne sera visible dans l'application qu'après vérification complète.
 
-Dans l'application native, ouvrez **Modèle de transcription**, choisissez un modèle installé, puis cliquez sur **Préparer le moteur**. La liste ne montre que les installations complètes. Après une installation faite pendant que l'application est ouverte, utilisez **Actualiser les modèles**. Le libellé **Modèle actif** confirme le moteur chargé ; changer le choix seul ne le charge pas. L'option **Dossier personnalisé** accepte un autre modèle compatible. Le choix reste limité à la session actuelle.
+Dans l’application native, ouvrez **Réglages → Modèle de transcription**, choisissez un modèle installé, puis cliquez sur **Enregistrer et préparer**. La liste ne montre que les installations complètes. Après une installation faite pendant que l’application est ouverte, utilisez **Actualiser les appareils et modèles**. Changer la sélection seul ne charge pas un nouveau moteur. L’option **Dossier personnalisé** accepte un autre modèle compatible. Le choix enregistré est restauré au prochain lancement ; revenez dans **Dictée** et attendez « Prêt à dicter » avant de parler.
 
 Le contrôle hors ligne charge le vrai `Transcriber`, utilise un WAV de silence synthétique dans un dossier privé, et attend `NO_SPEECH`. Les connexions Python sont bloquées pendant ce contrôle et les bibliothèques utilisent uniquement les fichiers locaux. Aucun microphone n'est enregistré.
 

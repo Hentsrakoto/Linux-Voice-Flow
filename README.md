@@ -2,7 +2,7 @@
 
 Application de dictée locale ou via Groq pour Linux Mint Cinnamon/X11 : Tauri 2, React/TypeScript, cœur Rust et moteur Python.
 
-**État : T-01 à T-06 implémentés, avec choix Local/Groq.** La fenêtre permet de préparer un modèle local ou le service Groq, choisir un microphone et dicter par maintien du raccourci. Le texte est affiché dans l’application ; l’insertion dans une autre fenêtre reste prévue en T-07. Le parcours réel microphone/modèle/X11 et la transcription avec une vraie clé Groq restent à recetter sur le poste cible.
+**État : T-01 à T-08 implémentés, recette native finale en cours.** Les vues **Dictée** et **Réglages** sont séparées : raccourci actif et résultat éphémère sur Dictée ; fournisseur Local/Groq, modèles, microphone, langue, raccourci, insertion et diagnostic dans Réglages. L’insertion X11 vérifie la cible ; en cas d’échec, le résultat reste récupérable par copie explicite ou copie automatique consentie. Les réglages sont sauvegardés et restaurés. La dictée réelle au microphone dans un éditeur et un navigateur sur le poste cible reste à recetter avant de déclarer J2 acquis.
 
 - [Cahier des charges](CAHIER_DES_CHARGES_LINUX_VOICE_FLOW.md)
 - [Plan et suivi](docs/developpement/plan.md)
@@ -27,17 +27,27 @@ Le navigateur affiche un aperçu de l’interface ; les fonctions natives néces
 npm run tauri dev
 ```
 
-Voir les prérequis Rust/WebKitGTK dans le guide d’installation. Aucun modèle n’est téléchargé par l’application. Le moteur Python se teste séparément avec un modèle local préparé explicitement.
-
-Whisper Tiny est installé dans cette copie du projet. Pour ajouter explicitement Base :
+Avant de préparer **Local ou Groq**, installez le moteur Python du projet (Groq utilise aussi la détection de parole locale) :
 
 ```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r engine/requirements.lock.txt
+```
+
+Dans **Réglages**, cliquez ensuite sur **Enregistrer et préparer**. Le raccourci ne démarre la capture qu’après l’état **Prêt à dicter**.
+
+Voir les prérequis Rust/WebKitGTK dans le guide d’installation. Aucun modèle n’est téléchargé par l’application. Le moteur Python se teste séparément avec un modèle local préparé explicitement.
+
+Les modèles ne sont pas inclus dans Git. Pour installer explicitement Tiny ou Base :
+
+```bash
+.venv/bin/python scripts/install_models.py tiny
 .venv/bin/python scripts/install_models.py base
 ```
 
-Dans la fenêtre Tauri, choisissez **Modèle de transcription**, puis **Préparer le moteur**. Tiny est proposé par défaut. Pour changer de modèle, sélectionnez Base puis préparez à nouveau le moteur. Le libellé **Modèle actif** confirme le modèle chargé. Un dossier personnalisé reste possible ; le choix reste limité à la session.
+Dans la fenêtre Tauri, ouvrez **Réglages**, choisissez le service et le modèle ou son dossier personnalisé, puis **Enregistrer et préparer**. Revenez dans **Dictée** et attendez **Prêt à dicter**. Placez le curseur dans votre application cible, maintenez le raccourci pour parler et relâchez-le pour transcrire et insérer. Les choix enregistrés sont restaurés au prochain lancement.
 
-Pour Groq, renseignez `GROQ_API_KEY` et `GROQ_MODEL` dans `.env` (modèle de fichier : `.env.exemple`). Sélectionnez **Service de transcription → Groq — API**, puis **Préparer le moteur**. Seul ce mode envoie l’audio à Groq ; le mode local ne nécessite aucune clé. Voir [le guide Groq](docs/groq.md).
+Pour Groq, renseignez `GROQ_API_KEY` et `GROQ_MODEL` dans `.env` (modèle de fichier : `.env.exemple`). Dans **Réglages**, sélectionnez **Service de transcription → Groq — API**, puis **Enregistrer et préparer**. Seul ce mode envoie l’audio à Groq ; le mode local ne nécessite aucune clé. Voir [le guide Groq](docs/groq.md).
 
 ## Vérifications
 

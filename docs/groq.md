@@ -1,5 +1,7 @@
 # Choisir la transcription Groq
 
+Le mode API nécessite aussi le Python du projet et ses dépendances : `python3 -m venv .venv`, puis `.venv/bin/python -m pip install -r engine/requirements.lock.txt`. La détection de parole reste locale. Après installation, cliquez sur **Enregistrer et préparer** et attendez **Prêt à dicter** avant de maintenir le raccourci.
+
 Le mode local conserve le fonctionnement hors ligne. Le mode **Groq — API** envoie le WAV de la dictée au service Groq quand vous relâchez le raccourci. Il nécessite Internet et un compte Groq. Les quotas et la facturation dépendent de votre compte ; l’application ne garantit pas la gratuité du service.
 
 ## Configuration
@@ -26,7 +28,7 @@ Les variables d’environnement `GROQ_API_KEY` et `GROQ_MODEL`, si elles sont d�
 
 1. Lancez `npm run tauri dev`.
 2. Sélectionnez le mode **Groq** dans le panneau de dictée, puis choisissez le microphone et la langue.
-3. Cliquez sur **Préparer le moteur** et vérifiez l’indication du mode actif.
+3. Dans **Réglages**, cliquez sur **Enregistrer et préparer** et vérifiez l’indication du mode actif.
 4. Maintenez le raccourci pour dicter une courte phrase, puis relâchez-le. Vérifiez le résultat dans l’application.
 5. Sélectionnez **Local**, choisissez un modèle installé et préparez à nouveau le moteur pour revenir au fonctionnement hors ligne.
 
